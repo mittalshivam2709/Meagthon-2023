@@ -1,0 +1,57 @@
+var image = ee.ImageCollection('COPERNICUS/S2_SR') 
+  .filterDate('2022-6-01', '2022-12-30')
+  .filterBounds(geometry);
+
+var NDWI = function(image) {
+  return image.expression(
+    '(NIR - SWIR) / (NIR + SWIR)', 
+    {
+      'NIR': image.select('B8'), 
+      'SWIR': image.select('B11'), // Change to B3 for the green band
+    }).rename('NDWI').copyProperties(image, image.propertyNames());
+};
+
+// Calculate NDWI for each image
+var NDWI_2021 = image.map(NDWI);
+
+// // Create a collection of masks for different NDWI categories
+// var masks = NDWI_2021.map(function(image) {
+//   var yellowMask = image.select('NDWI').gt(0.7);
+//   var blueMask = image.select('NDWI').lte(0.2);
+//   var greenMask = image.select('NDWI').gt(0.2).and(image.select('NDWI').lte(0.7));
+  
+//   return blueMask.add(yellowMask.multiply(2)).add(greenMask.multiply(3));
+// });
+
+// // Display the color-coded NDWI image
+// Map.addLayer(masks, {min: 1, max: 3, palette: ['yellow', 'blue', 'green']}, 'NDWI Classification');
+Map.addLayer(NDWI_2021, {
+  min: -1,  // Minimum value to display as the darkest color
+  max: 1,   // Maximum value to display as the brightest color
+  palette: ["FFFFFF","FFFFFF","FFFFFF", "FFFFFF","FF0000","FFFFFF","FFFFFF","FFFFFF","FFFFFF"], // Define a custom color palette
+}, 'NDWI 2021');
+
+var customPalette = ["FFFFFF","FFFFFF","FFFFFF", "FFFFFF","FF0000","FFFFFF","FFFFFF","FFFFFF","FFFFFF"];
+var colorRamp = ee.List.sequence(1, customPalette.length - 1);
+var createMask = function(startIndex, endIndex, geometry, NDWI_2021) {
+  var NDWI111 = NDWI_2021.clip(geometry);
+  return NDWI111.gte(startIndex).and(NDWI111.lt(endIndex));
+};
+var areaInfo = colorRamp.map(function(startIndex) {
+  var endIndex = ee.Number(startIndex).add(1);
+  var colorRange = customPalette.slice(startIndex, endIndex);
+    var mask = createMask(startIndex, endIndex, geometry, NDWI_2021);
+  var area = mask.reduceRegion({
+    reducer: ee.Reducer.sum(),
+    geometry: geometry,
+    scale: 10, // Adjust the scale as needed
+    maxPixels: 1e9
+  }).get('NDWI');
+
+  return ee.Feature(null, {
+    range: colorRange,
+    area: area
+  });
+});
+
+print("Area Information", areaInfo);

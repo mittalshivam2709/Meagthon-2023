@@ -1,0 +1,54 @@
+
+// // NDVI CLASSIFIATION RABI SEASON 2022 (JAN-FEB-MAR)
+
+
+var image0 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED') 
+  .filterDate('2022-07-01','2022-07-30')
+  .filterBounds(table)
+var image = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED') 
+  .filterDate('2022-08-01','2022-08-30')
+  .filterBounds(table)
+// print(image,{},'image')
+//Map.addLayer(image,{},'image')
+
+var image2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED') 
+  .filterDate('2022-09-01','2022-09-30')
+  .filterBounds(table)
+  
+var image3 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED') 
+  .filterDate('2022-10-01','2022-10-30')
+  .filterBounds(table)
+  
+var image4 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED') 
+  .filterDate('2022-11-01','2022-11-30')
+  .filterBounds(table)
+  
+var image55 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED') 
+  .filterDate('2022-07-01','2022-11-30')
+  .filterBounds(table)
+  
+
+
+// Define an index function (return only GNDVI).
+var GNDVI = function(image) {
+  return image.expression(
+    '(NIR - GREEN) / (NIR + GREEN)', 
+    {
+      'NIR': image.select('B8'), 
+      'GREEN': image.select('B4'), // Change to B3 for the green band
+    }).rename('GNDVI').copyProperties(image, image.propertyNames());
+};
+
+var GNDVI_2021_0 = image0.map(GNDVI).mean()
+var GNDVI_2021_1 = image.map(GNDVI).mean()
+var GNDVI_2021_2 = image2.map(GNDVI).mean()
+var GNDVI_2021_3 = image3.map(GNDVI).mean()
+var GNDVI_2021_4 = image4.map(GNDVI).mean()
+var GNDVI_2021_55 = image55.map(GNDVI)                                                         
+
+Map.addLayer(GNDVI_2021_0,imageVisParam4, 'gndviseries0')
+Map.addLayer(GNDVI_2021_1,imageVisParam4, 'gndviseries1')
+Map.addLayer(GNDVI_2021_2,imageVisParam4, 'gndviseries2')
+Map.addLayer(GNDVI_2021_3,imageVisParam4, 'gndviseries3')
+Map.addLayer(GNDVI_2021_4,imageVisParam4, 'gndviseries4')
+Map.addLayer(GNDVI_2021_55,imageVisParam4, 'gndviseries55')

@@ -35,3 +35,5 @@ now, according to seasons of india, the sowing season is in june july and harves
 
 by using the definition of NDVI and NDWI, we have done the crop identification and also the stage idenitfication, 
 for identifying the fake paddy crops we will again use the both to determine the overall quality of the paddy crop and will give it a rating between 0 to 1, 1 is the best qaulity of the paddy and 0 is damaged paddy. NDVI values for fake paddy will  be lesser than original or high quality paddy crop.
+# 3 for online procurment 
+we will estimate the total yield of the paddy crop by estimating the areas falling in different regions.so we fill find the area of the paddy crop by finding area of colored region which represents the paddy crop field.
